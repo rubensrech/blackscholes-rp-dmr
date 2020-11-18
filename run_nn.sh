@@ -14,14 +14,9 @@ application=blackscholes
 
 echo -e "${green} CUDA Sobel Edge-Detection Starting... ${white}"
 
-
 for f in test.data/input/*.data
 do
 	filename=$(basename "$f")
-	extension="${filename##*.}"
 	filename="${filename%.*}"
-
 	./bin/${application}_nn.out $f ./test.data/output/${filename}_${application}_nn.data
-	# ./bin/${application}.out    $f ./test.data/output/${filename}_${application}.data
-	# python ./scripts/qos.py ./test.data/output/${filename}_${application}_nn.data ./test.data/output/${filename}_${application}.data
 done
