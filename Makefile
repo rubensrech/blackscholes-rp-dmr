@@ -29,32 +29,12 @@
 #
 ################################################################################
 
-NVCC_ARCH=-gencode arch=compute_70,code=[sm_70,compute_70]
+# Compilers options
+GCC			:= g++
+CUDA_PATH	:= /usr/local/cuda
+NVCC 		:= $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
+NVCC_ARCH	:= -gencode arch=compute_70,code=[sm_70,compute_70]
 
-GCC ?= g++
-
-CUDA_PATH := /usr/local/cuda
-NVCC := $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
-
-
-# Common includes and paths for CUDA
-BASE_DIR        := /home/carol/rubens/axbench-gpu
-FANN_INC        := $(BASE_DIR)/parrot.c/src/FannLib # /usr/local/include
-FANN_LIB        := $(BASE_DIR)/parrot.c/src/FannLib # /usr/local/lib
-PARROT_LIB      := $(BASE_DIR)/parrot.c/src/ParrotLib
-PLANG           := $(BASE_DIR)/parrot.c/src/ParrotObserver/plang.py
-PARROT_JSON     := $(BASE_DIR)/parrot.c/src/ParrotObserver/ParrotC.json
-
-LIBRARIES :=
-
-include ./findgllib.mk
-
-LIBRARIES += -lGL -lGLU -lX11 -lXi -lXmu
-
-LFLAGS		:= -lFann -lboost_regex -lParrot
-HEADERS     := src
-INCLUDE 	:= -I${FANN_INC} -I${HEADERS}
-LIB			:= -L${FANN_LIB} -L$(PARROT_LIB)
 TARGET		:= blackscholes
 
 ################################################################################
@@ -67,16 +47,13 @@ DIR:
 build: $(TARGET)
 
 ./obj/BlackScholes_nn.o: ./src/BlackScholes.cu
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $< $(INCLUDE) $(LIB) $(LFLAGS)
+	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $<
 
 ./obj/BlackScholes_gold_nn.o:./src/BlackScholes_gold.cpp
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $< $(INCLUDE) $(LIB) $(LFLAGS)
+	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $<
 
 $(TARGET): ./obj/BlackScholes_nn.o ./obj/BlackScholes_gold_nn.o
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ $+ $(LIBRARIES) $(INCLUDE) $(LIB) $(LFLAGS)
-
-run: build
-	./$(TARGET)
+	$(NVCC) -O3 $(NVCC_ARCH) -o $@ $+
 
 clean:
 	rm -rf $(TARGET)

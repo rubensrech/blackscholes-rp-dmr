@@ -1,7 +1,6 @@
-// Amir
 #include <fstream>
 using namespace std;
-// Rima
+
 ////////////////////////////////////////////////////////////////////////////////
 // Process an array of optN options on CPU
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,14 +57,7 @@ __device__ inline void BlackScholesBodyGPU(
     float sqrtT, expRT;
     float d1, d2, CNDD1, CNDD2;
 
-    float parrotInput[3];
     float parrotOutput[1];
-
-    parrotInput[0] = S;
-    parrotInput[1] = X;
-    parrotInput[2] = T;
-
-#pragma parrot(input, "BlackScholesBodyGPU", [3]parrotInput)
     
     sqrtT = sqrtf(T);
     d1 = (__logf(S / X) + (R + 0.5f * V * V) * T) / (V * sqrtT);
@@ -74,12 +66,10 @@ __device__ inline void BlackScholesBodyGPU(
     CNDD1 = cndGPU(d1);
     CNDD2 = cndGPU(d2);
 
-    //Calculate Call and Put simultaneously
+    // Calculate Call and Put simultaneously
     expRT = __expf(- R * T);
     CallResult = S * CNDD1 - X * expRT * CNDD2;
     parrotOutput[0] = CallResult / 10.0;
-
-#pragma parrot(output, "BlackScholesBodyGPU", [1]<0.0;0.9>parrotOutput)
 
     CallResult = parrotOutput[0] * 10.0;
     PutResult  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
@@ -115,16 +105,6 @@ __global__ void BlackScholesGPU(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Helper function, returning uniformly distributed
-// random float in [low, high] range
-////////////////////////////////////////////////////////////////////////////////
-float RandFloat(float low, float high)
-{
-    float t = (float)rand() / (float)RAND_MAX;
-    return (1.0f - t) * low + t * high;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // Data configuration
 ////////////////////////////////////////////////////////////////////////////////
 const int OPT_N = 4000000;
@@ -143,7 +123,6 @@ const float    VOLATILITY = 0.30f;
 int main(int argc, char **argv)
 {
 
-#pragma parrot.start("BlackScholesBodyGPU")
     //'h_' prefix - CPU (host) memory space
     float
     //Results calculated by CPU for reference
@@ -185,12 +164,10 @@ int main(int argc, char **argv)
 
     srand(5347);
 
-    // Amir
     std::ifstream dataFile(argv[1]);
     int numberOptions;
     dataFile >> numberOptions;
     float stockPrice, optionStrike, optionYear;
-    // Rima
 
     //Generate options set
     for (i = 0; i < numberOptions; i++)
@@ -198,17 +175,15 @@ int main(int argc, char **argv)
         h_CallResultCPU[i] = 0.0f;
         h_PutResultCPU[i]  = -1.0f;
 
-        // Amir
         dataFile >> stockPrice >> optionStrike >> optionYear;
         h_StockPrice[i] = stockPrice;
         h_OptionStrike[i] = optionStrike;
         h_OptionYears[i] =  optionYear;      
-        // Rima
     }
 
     int optionSize = numberOptions * sizeof(float);
 
-    //Copy options data to GPU memory for further processing
+    // Copy options data to GPU memory for further processing
     cudaMemcpy(d_StockPrice,  h_StockPrice,   optionSize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionStrike, h_OptionStrike,  optionSize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionYears,  h_OptionYears,   optionSize, cudaMemcpyHostToDevice);
@@ -233,11 +208,10 @@ int main(int argc, char **argv)
 
     cudaDeviceSynchronize();
 
-    //Read back GPU results to compare them to CPU results
+    // Read back GPU results to compare them to CPU results
     cudaMemcpy(h_CallResultGPU, d_CallResult, optionSize, cudaMemcpyDeviceToHost);
     cudaMemcpy(h_PutResultGPU,  d_PutResult,  optionSize, cudaMemcpyDeviceToHost);
 
-    // Amir
     ofstream callResultFile;
     callResultFile.open(argv[2]);
     for (i = 0 ; i < numberOptions; i++)
@@ -245,10 +219,7 @@ int main(int argc, char **argv)
         callResultFile << h_CallResultGPU[i] << std::endl;
     }
     callResultFile.close();
-    // Rima
 
-
-#pragma parrot.end("BlackScholesBodyGPU")
 
     cudaFree(d_OptionYears);
     cudaFree(d_OptionStrike);
@@ -265,6 +236,5 @@ int main(int argc, char **argv)
 
     cudaDeviceReset();
 
-    //printf("Test passed\n");
     exit(EXIT_SUCCESS);
 }

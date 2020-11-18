@@ -18,5 +18,5 @@ for f in test.data/input/*.data
 do
 	filename=$(basename "$f")
 	filename="${filename%.*}"
-	./bin/${application}_nn.out $f ./test.data/output/${filename}_${application}_nn.data
+	./${application} $f ./test.data/output/${filename}_${application}_nn.data
 done
