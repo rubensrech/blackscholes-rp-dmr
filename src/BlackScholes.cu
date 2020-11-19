@@ -5,31 +5,31 @@ using namespace std;
 // Process an array of optN options on CPU
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" void BlackScholesCPU(
-    float *h_CallResult,
-    float *h_PutResult,
-    float *h_StockPrice,
-    float *h_OptionStrike,
-    float *h_OptionYears,
-    float Riskfree,
-    float Volatility,
+    double *h_CallResult,
+    double *h_PutResult,
+    double *h_StockPrice,
+    double *h_OptionStrike,
+    double *h_OptionYears,
+    double Riskfree,
+    double Volatility,
     int optN
 );
 
 ///////////////////////////////////////////////////////////////////////////////
 // Polynomial approximation of cumulative normal distribution function
 ///////////////////////////////////////////////////////////////////////////////
-__device__ inline float cndGPU(float d) {
-    const float       A1 = 0.31938153f;
-    const float       A2 = -0.356563782f;
-    const float       A3 = 1.781477937f;
-    const float       A4 = -1.821255978f;
-    const float       A5 = 1.330274429f;
-    const float RSQRT2PI = 0.39894228040143267793994605993438f;
+__device__ inline double cndGPU(double d) {
+    const double       A1 = 0.31938153f;
+    const double       A2 = -0.356563782f;
+    const double       A3 = 1.781477937f;
+    const double       A4 = -1.821255978f;
+    const double       A5 = 1.330274429f;
+    const double RSQRT2PI = 0.39894228040143267793994605993438f;
 
-    float
+    double
     K = 1.0f / (1.0f + 0.2316419f * fabsf(d));
 
-    float
+    double
     cnd = RSQRT2PI * __expf(- 0.5f * d * d) *
           (K * (A1 + K * (A2 + K * (A3 + K * (A4 + K * A5)))));
 
@@ -44,18 +44,18 @@ __device__ inline float cndGPU(float d) {
 // Black-Scholes formula for both call and put
 ///////////////////////////////////////////////////////////////////////////////
 __device__ inline void BlackScholesBodyGPU(
-    float &CallResult,
-    float &PutResult,
-    float S, //Stock price
-    float X, //Option strike
-    float T, //Option years
-    float R, //Riskless rate
-    float V  //Volatility rate
+    double &CallResult,
+    double &PutResult,
+    double S, //Stock price
+    double X, //Option strike
+    double T, //Option years
+    double R, //Riskless rate
+    double V  //Volatility rate
 ) {
-    float sqrtT, expRT;
-    float d1, d2, CNDD1, CNDD2;
+    double sqrtT, expRT;
+    double d1, d2, CNDD1, CNDD2;
 
-    float parrotOutput[1];
+    double parrotOutput[1];
     
     sqrtT = sqrtf(T);
     d1 = (__logf(S / X) + (R + 0.5f * V * V) * T) / (V * sqrtT);
@@ -78,13 +78,13 @@ __device__ inline void BlackScholesBodyGPU(
 //Process an array of optN options on GPU
 ////////////////////////////////////////////////////////////////////////////////
 __global__ void BlackScholesGPU(
-    float *d_CallResult,
-    float *d_PutResult,
-    float *d_StockPrice,
-    float *d_OptionStrike,
-    float *d_OptionYears,
-    float Riskfree,
-    float Volatility,
+    double *d_CallResult,
+    double *d_PutResult,
+    double *d_StockPrice,
+    double *d_OptionStrike,
+    double *d_OptionYears,
+    double Riskfree,
+    double Volatility,
     int optN
 ) {
     const int opt = blockDim.x * blockIdx.x + threadIdx.x;
@@ -106,9 +106,9 @@ __global__ void BlackScholesGPU(
 const int OPT_N = 4000000;
 const int  NUM_ITERATIONS = 1;
 
-const int   OPT_SZ      = OPT_N * sizeof(float);
-const float RISKFREE    = 0.02f;
-const float VOLATILITY  = 0.30f;
+const int   OPT_SZ      = OPT_N * sizeof(double);
+const double RISKFREE    = 0.02f;
+const double VOLATILITY  = 0.30f;
 
 #define DIV_UP(a, b) ( ((a) + (b) - 1) / (b) )
 
@@ -129,12 +129,12 @@ int main(int argc, char **argv) {
     // == Declaring variables
     // ======================================
     // > Host data
-    float *h_CallResultGPU, *h_PutResultGPU; // CPU copy of GPU results
-    float *h_StockPrice, *h_OptionStrike, *h_OptionYears; // CPU instance of input data
+    double *h_CallResultGPU, *h_PutResultGPU; // CPU copy of GPU results
+    double *h_StockPrice, *h_OptionStrike, *h_OptionYears; // CPU instance of input data
     
     // > Device data
-    float *d_CallResult, *d_PutResult; // Results calculated by GPU
-    float *d_StockPrice, *d_OptionStrike, *d_OptionYears; // GPU instance of input data
+    double *d_CallResult, *d_PutResult; // Results calculated by GPU
+    double *d_StockPrice, *d_OptionStrike, *d_OptionYears; // GPU instance of input data
     
     int i;
 
@@ -142,11 +142,11 @@ int main(int argc, char **argv) {
     // == Allocating memory
     // ======================================
     // > Host data
-    h_CallResultGPU = (float *)malloc(OPT_SZ);
-    h_PutResultGPU  = (float *)malloc(OPT_SZ);
-    h_StockPrice    = (float *)malloc(OPT_SZ);
-    h_OptionStrike  = (float *)malloc(OPT_SZ);
-    h_OptionYears   = (float *)malloc(OPT_SZ);
+    h_CallResultGPU = (double *)malloc(OPT_SZ);
+    h_PutResultGPU  = (double *)malloc(OPT_SZ);
+    h_StockPrice    = (double *)malloc(OPT_SZ);
+    h_OptionStrike  = (double *)malloc(OPT_SZ);
+    h_OptionYears   = (double *)malloc(OPT_SZ);
 
     // > Device data
     cudaMalloc((void **)&d_CallResult,   OPT_SZ);
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
     int numberOptions;
     dataFile >> numberOptions;
 
-    float stockPrice, optionStrike, optionYear;
+    double stockPrice, optionStrike, optionYear;
     for (i = 0; i < numberOptions; i++) {
         dataFile >> stockPrice >> optionStrike >> optionYear;
         h_StockPrice[i] = stockPrice;
@@ -174,9 +174,9 @@ int main(int argc, char **argv) {
     // ======================================
     // == Copying data to device
     // ======================================
-    cudaMemcpy(d_StockPrice,    h_StockPrice,   numberOptions * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_OptionStrike,  h_OptionStrike, numberOptions * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_OptionYears,   h_OptionYears,  numberOptions * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_StockPrice,    h_StockPrice,   numberOptions * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_OptionStrike,  h_OptionStrike, numberOptions * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_OptionYears,   h_OptionYears,  numberOptions * sizeof(double), cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
 
     // ======================================
@@ -200,8 +200,8 @@ int main(int argc, char **argv) {
     // ======================================
     // == Reading back results from device
     // ======================================
-    cudaMemcpy(h_CallResultGPU, d_CallResult, numberOptions * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_PutResultGPU,  d_PutResult,  numberOptions * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_CallResultGPU, d_CallResult, numberOptions * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_PutResultGPU,  d_PutResult,  numberOptions * sizeof(double), cudaMemcpyDeviceToHost);
 
     // ======================================
     // == Writing results to output file
