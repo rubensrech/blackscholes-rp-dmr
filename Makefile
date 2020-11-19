@@ -61,8 +61,12 @@ $(TARGET): ./obj/BlackScholes_nn.o ./obj/BlackScholes_gold_nn.o
 clean:
 	rm -rf $(TARGET)
 	rm -rf ./obj/BlackScholes_nn.o ./obj/BlackScholes_gold_nn.o
+	rm -f ./test.data/output/blackscholes_4000K_blackscholes_nn.data
 
 clobber: clean
+
+see_output:
+	nano ./test.data/output/blackscholes_4000K_blackscholes_nn.data
 
 copy_titanV:
 	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/blackscholes
