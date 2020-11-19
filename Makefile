@@ -33,7 +33,10 @@
 GCC			:= g++
 CUDA_PATH	:= /usr/local/cuda
 NVCC 		:= $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
-NVCC_ARCH	:= -gencode arch=compute_70,code=[sm_70,compute_70]
+NVCC_ARCH	:= -gencode arch=compute_60,code=sm_60 \
+				-gencode arch=compute_61,code=sm_61 \
+				-gencode arch=compute_62,code=[sm_62,compute_62] \
+				-gencode arch=compute_70,code=[sm_70,compute_70]
 
 TARGET		:= blackscholes
 
@@ -63,3 +66,6 @@ clobber: clean
 
 copy_titanV:
 	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/blackscholes
+
+copy_p100:
+	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes
