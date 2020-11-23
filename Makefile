@@ -30,43 +30,57 @@
 ################################################################################
 
 # Compilers options
-GCC			:= g++
+CPP			:= g++
+CPPFLAGS	:=
+
 CUDA_PATH	:= /usr/local/cuda
-NVCC 		:= $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
+NVCC 		:= $(CUDA_PATH)/bin/nvcc -ccbin $(CPP)
 NVCC_ARCH	:= -gencode arch=compute_60,code=sm_60 \
 				-gencode arch=compute_61,code=sm_61 \
 				-gencode arch=compute_62,code=[sm_62,compute_62] \
 				-gencode arch=compute_70,code=[sm_70,compute_70]
+NVCCFLAGS	:= -std=c++11 -O3 -Xptxas -v
+
+INCLUDE		:= -I$(CUDA_PATH)/include
+LDFLAGS		:= -L$(CUDA_PATH)/lib64  -lcudart  -lcurand
 
 TARGET		:= blackscholes
+OBJ_DIR		:= ./obj
+SRC_DIR		:= ./src
+
+CPP_FILES=$(wildcard $(SRC_DIR)/*.cpp)
+H_FILES=$(wildcard $(SRC_DIR)/*.h)
+CU_FILES=$(wildcard $(SRC_DIR)/*.cu)
+CUH_FILES=$(wildcard $(SRC_DIR)/*.cuh)
+OBJ_FILES=$(addprefix $(OBJ_DIR)/, $(notdir $(CPP_FILES:.cpp=.o)))
+OBJ_FILES+=$(addprefix $(OBJ_DIR)/, $(notdir $(CU_FILES:.cu=.cu.o)))
 
 ################################################################################
 
 all: DIR build
 
 DIR:
-	mkdir -p obj
+	mkdir -p $(OBJ_DIR)
 
 build: $(TARGET)
 
-./obj/BlackScholes_nn.o: ./src/BlackScholes.cu
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $<
+# C++
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(H_FILES)
+	$(CPP) $(CPPFLAGS) -c $< -o $@ $(INCLUDE)
 
-./obj/BlackScholes_gold_nn.o:./src/BlackScholes_gold.cpp
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ -c $<
+# CUDA
+$(OBJ_DIR)/%.cu.o: $(SRC_DIR)/%.cu $(CUH_FILES)
+	$(NVCC) $(NVCC_ARCH) $(NVCCFLAGS) -c $< -o $@ $(INCLUDE)
 
-$(TARGET): ./obj/BlackScholes_nn.o ./obj/BlackScholes_gold_nn.o
-	$(NVCC) -O3 $(NVCC_ARCH) -o $@ $+
+# Executable
+$(TARGET): $(OBJ_FILES)
+	$(CPP) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
 
 clean:
 	rm -rf $(TARGET)
-	rm -rf ./obj/BlackScholes_nn.o ./obj/BlackScholes_gold_nn.o
-	rm -f ./test.data/output/blackscholes_4000K_blackscholes_nn.data
+	rm -rf $(OBJ_DIR)
 
 clobber: clean
-
-see_output:
-	nano ./test.data/output/blackscholes_4000K_blackscholes_nn.data
 
 copy_titanV:
 	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/blackscholes
