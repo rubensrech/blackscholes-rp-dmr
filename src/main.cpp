@@ -124,8 +124,25 @@ int main(int argc, char **argv) {
     // ======================================
     // == Executing on device
     // ======================================
+
+    cudaEvent_t start, stop;
+    float kernelTimeMs;
+    if (measureTime) {
+        cudaEventCreate(&start);
+        cudaEventRecord(start, 0);
+    }
+
     BlackScholesGPU(d_CallResult, d_PutResult, d_CallResult_rp, d_PutResult_rp,
                     d_StockPrice, d_OptionStrike, d_OptionYears, numberOptions);
+
+    if (measureTime) {
+        cudaEventCreate(&stop);
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&kernelTimeMs, start, stop);
+        printf("Kernel time: %f ms\n", kernelTimeMs);
+    }
+
     cudaDeviceSynchronize();
 
     // ======================================
@@ -217,8 +234,23 @@ int main(int argc, char **argv) {
     // == Checking for faults
     // ======================================
 
+    float checkTimeMs;
+    if (measureTime) {
+        cudaEventCreate(&start);
+        cudaEventRecord(start, 0);
+    }
+
     checkErrorsGPU(d_CallResult, d_CallResult_rp, numberOptions, CALL_RESULT_REL_ERR_THRESHOLD);
     checkErrorsGPU(d_PutResult, d_PutResult_rp, numberOptions, PUT_RESULT_REL_ERR_THRESHOLD);
+
+    if (measureTime) {
+        cudaEventCreate(&stop);
+        cudaEventRecord(stop,0);
+        cudaEventSynchronize(stop);
+
+        cudaEventElapsedTime(&checkTimeMs, start, stop);
+        printf("Check time: %f ms\n", checkTimeMs);
+    }
 
     unsigned long long dmrErrors = getDMRErrors();
     bool faultDetected = dmrErrors > 0;
