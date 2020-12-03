@@ -71,8 +71,8 @@ bool save_output(double *CallResult, double *PutResult, int N) {
     return true;
 }
 
-bool compare_output_with_golden(double *CallResult, double *PutResult, int N) {
-    ifstream f("gold_output.data", ios::in | ios::binary);
+bool compare_output_with_golden(double *CallResult, double *PutResult, int N, char *goldOutputFilename) {
+    ifstream f(goldOutputFilename, ios::in | ios::binary);
     double *gold_CallResult, *gold_PutResult;
     int n, i = 0;
 

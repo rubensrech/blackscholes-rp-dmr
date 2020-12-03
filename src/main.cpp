@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
 
     // * Input filename
     char *inputFilename = find_char_arg(argc, argv, (char*)"-input", (char*)"test.data/input/blackscholes_4000K.data");
+    // * Gold output
+    char *goldOutputFilename = find_char_arg(argc, argv, (char*)"-goldOutput", (char*)"gold_output.data");
     // * Save output
     bool saveOutput = find_int_arg(argc, argv, (char*)"-saveOutput", 0);
     // * Measure time
@@ -62,6 +64,10 @@ int main(int argc, char **argv) {
 
     // > Reading size of input
     std::ifstream dataFile(inputFilename);
+    if (!dataFile.is_open()) {
+        cerr << "ERROR: could not open input file" << endl;
+        exit(-1);
+    }
 
     int numberOptions;
     dataFile >> numberOptions;
@@ -231,7 +237,7 @@ int main(int argc, char **argv) {
     // ======================================
     // == Comparing output with Golden output
     // ======================================
-    bool outputIsCorrect = compare_output_with_golden(h_CallResultGPU, h_PutResultGPU, numberOptions);
+    bool outputIsCorrect = compare_output_with_golden(h_CallResultGPU, h_PutResultGPU, numberOptions, goldOutputFilename);
     cout << "> Output corrupted? " << (!outputIsCorrect ? "YES" : "NO") << endl;
 
     // ======================================

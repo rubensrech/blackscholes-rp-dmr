@@ -37,6 +37,6 @@ int find_int_arg(int argc, char **argv, char *arg, int def);
 char *find_char_arg(int argc, char **argv, char *arg, char *def);
 
 bool save_output(double *CallResult, double *PutResult, int N);
-bool compare_output_with_golden(double *CallResult, double *PutResult, int N);
+bool compare_output_with_golden(double *CallResult, double *PutResult, int N, char *goldOutputFilename);
 
 #endif
