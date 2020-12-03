@@ -1,11 +1,54 @@
+#include "kernels.h"
 #include "util.h"
+
+////////////////////////////////////////////////////////////////////////////////
+// Check error functions
+////////////////////////////////////////////////////////////////////////////////
+
+__device__ unsigned long long errors = 0;
+
+__forceinline__  __device__ void relativeError(double rhs, float lhs, float REL_ERR_THRESHOLD) {
+    float relErr = abs(1 - lhs / float(rhs));
+    if (relErr > REL_ERR_THRESHOLD) {
+        atomicAdd(&errors, 1);
+    }
+}
+
+__forceinline__  __device__ void uintError(double rhs, float lhs, float UINT_ERR_THRESHOLD) {
+	float rhs_as_float = float(rhs);
+	uint32_t lhs_data = *((uint32_t*) &lhs);
+	uint32_t rhs_data = *((uint32_t*) &rhs_as_float);
+
+	uint32_t uintErr = SUB_ABS(lhs_data, rhs_data);
+
+	if (uintErr > UINT_ERR_THRESHOLD) {
+		atomicAdd(&errors, 1);
+	}
+}
+
+__device__ void checkErrors(double rhs, float lhs, float THRESHOLD) {
+#if ERROR_METRIC == UINT_ERROR
+    uintError(rhs, lhs, THRESHOLD);
+#else
+    relativeError(rhs, lhs, THRESHOLD);
+#endif
+}
+
+// > Getters
+
+unsigned long long getDMRErrors() {
+    unsigned long long ret = 0;
+    cudaMemcpyFromSymbol(&ret, errors, sizeof(unsigned long long), 0, cudaMemcpyDeviceToHost);
+    return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BLACK SCHOLES
+////////////////////////////////////////////////////////////////////////////////
 
 const double RISKFREE    = 0.02f;
 const double VOLATILITY  = 0.30f;
 
-///////////////////////////////////////////////////////////////////////////////
-// Polynomial approximation of cumulative normal distribution function
-///////////////////////////////////////////////////////////////////////////////
 __device__ inline double cndGPU(double d) {
     const double       A1 = 0.31938153f;
     const double       A2 = -0.356563782f;
@@ -44,9 +87,6 @@ __device__ inline float cndGPU(float d) {
     return cnd;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Black-Scholes formula for both call and put
-///////////////////////////////////////////////////////////////////////////////
 __device__ inline void BlackScholesBodyGPU(double &CallResult, double &PutResult, float &CallResult_rp,
         float &PutResult_rp, double S, double X, double T, double R, double V) {
     // > Full-precision
@@ -84,12 +124,11 @@ __device__ inline void BlackScholesBodyGPU(double &CallResult, double &PutResult
     PutResult  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
     // > Reduced-precision
     PutResult_rp  = X_rp * expRT_rp * (1.0f - CNDD2_rp) - S_rp * (1.0f - CNDD1_rp);
+
+    checkErrors(CallResult, CallResult_rp, CALL_RESULT_REL_ERR_THRESHOLD);
+    checkErrors(PutResult, PutResult_rp, PUT_RESULT_REL_ERR_THRESHOLD);
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-//Process an array of optN options on GPU
-////////////////////////////////////////////////////////////////////////////////
 __global__ void BlackScholesKernel(double *CallResult, double *PutResult, float *CallResult_rp, float *PutResult_rp,
         double *StockPrice, double *OptionStrike, double *OptionYears, double Riskfree, double Volatility, int optN) {
 
@@ -105,6 +144,7 @@ void BlackScholesGPU(double *CallResult, double *PutResult, float *CallResult_rp
     BlackScholesKernel<<<DIV_UP(optN, BLOCK_SIZE), BLOCK_SIZE>>>(CallResult, PutResult, CallResult_rp,
             PutResult_rp, StockPrice, OptionStrike, OptionYears, RISKFREE, VOLATILITY, optN);
 }
+
 
 
 

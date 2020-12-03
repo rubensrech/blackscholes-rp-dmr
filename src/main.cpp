@@ -3,7 +3,7 @@
 using namespace std;
 
 #include "util.h"
-#include "dmrFunctions.h"
+#include "kernels.h"
 
 extern "C" void BlackScholesCPU(
     double *h_CallResult,
@@ -13,17 +13,6 @@ extern "C" void BlackScholesCPU(
     double *h_OptionYears,
     double Riskfree,
     double Volatility,
-    int optN
-);
-
-extern void BlackScholesGPU(
-    double *d_CallResult,
-    double *d_PutResult,
-    float *d_CallResult_rp,
-    float *d_PutResult_rp,
-    double *d_StockPrice,
-    double *d_OptionStrike,
-    double *d_OptionYears,
     int optN
 );
 
@@ -233,24 +222,6 @@ int main(int argc, char **argv) {
     // ======================================
     // == Checking for faults
     // ======================================
-
-    float checkTimeMs;
-    if (measureTime) {
-        cudaEventCreate(&start);
-        cudaEventRecord(start, 0);
-    }
-
-    checkErrorsGPU(d_CallResult, d_CallResult_rp, numberOptions, CALL_RESULT_REL_ERR_THRESHOLD);
-    checkErrorsGPU(d_PutResult, d_PutResult_rp, numberOptions, PUT_RESULT_REL_ERR_THRESHOLD);
-
-    if (measureTime) {
-        cudaEventCreate(&stop);
-        cudaEventRecord(stop,0);
-        cudaEventSynchronize(stop);
-
-        cudaEventElapsedTime(&checkTimeMs, start, stop);
-        printf("Check time: %f ms\n", checkTimeMs);
-    }
 
     unsigned long long dmrErrors = getDMRErrors();
     bool faultDetected = dmrErrors > 0;
