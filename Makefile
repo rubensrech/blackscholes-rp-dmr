@@ -65,7 +65,7 @@ clean:
 clobber: clean
 
 copy_titanV:
-	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/blackscholes
+	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV211:blackscholes
 
 copy_p100:
 	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes

@@ -104,7 +104,6 @@ __global__ void BlackScholesGPU(
 // Data configuration
 ////////////////////////////////////////////////////////////////////////////////
 const int OPT_N = 4000000;
-const int  NUM_ITERATIONS = 1;
 
 const int   OPT_SZ      = OPT_N * sizeof(double);
 const double RISKFREE    = 0.02f;
@@ -182,18 +181,30 @@ int main(int argc, char **argv) {
     // ======================================
     // == Executing on device
     // ======================================
-    for (i = 0; i < NUM_ITERATIONS; i++) {
-        BlackScholesGPU<<<DIV_UP(numberOptions, 128), 128>>>(
-            d_CallResult,
-            d_PutResult,
-            d_StockPrice,
-            d_OptionStrike,
-            d_OptionYears,
-            RISKFREE,
-            VOLATILITY,
-            numberOptions
-        ); 
-    }
+
+    cudaEvent_t start, stop;
+    float kernelElapsedTimeMs;
+
+    cudaEventCreate(&start);
+    cudaEventRecord(start, 0);
+
+    BlackScholesGPU<<<DIV_UP(numberOptions, 128), 128>>>(
+        d_CallResult,
+        d_PutResult,
+        d_StockPrice,
+        d_OptionStrike,
+        d_OptionYears,
+        RISKFREE,
+        VOLATILITY,
+        numberOptions
+    ); 
+
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+
+    cudaEventElapsedTime(&kernelElapsedTimeMs, start, stop);
+    printf("Kernel time: %f ms\n", kernelElapsedTimeMs);
 
     cudaDeviceSynchronize();
 
