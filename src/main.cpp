@@ -4,6 +4,7 @@ using namespace std;
 
 #include "util.h"
 #include "kernels.h"
+#include "dmr-constants.h"
 
 extern "C" void BlackScholesCPU(
     double *h_CallResult,

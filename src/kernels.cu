@@ -1,5 +1,6 @@
-#include "kernels.h"
 #include "util.h"
+#include "kernels.h"
+#include "dmr-constants.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Check error functions
