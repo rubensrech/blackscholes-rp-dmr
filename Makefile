@@ -114,7 +114,7 @@ copy_titanV:
 	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV211:blackscholes
 
 copy_nvbitfi_titanV:
-	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/nvbitfi/test-apps/blackscholes
+	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV211:nvbitfi/test-apps/blackscholes
 
 copy_p100:
 	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes
