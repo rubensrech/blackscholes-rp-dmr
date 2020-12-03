@@ -3,6 +3,7 @@
 using namespace std;
 
 #include "util.h"
+#include "dmrFunctions.h"
 
 extern "C" void BlackScholesCPU(
     double *h_CallResult,
@@ -30,14 +31,18 @@ extern void BlackScholesGPU(
 // Main program
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
+    // ======================================
+    // == Managing arguments
+    // ======================================
 
-    if (argc < 3) {
-        printf("Usage: %s <input-file> <output-file>\n", argv[0]);
-        exit(1);
-    }
+    // * Input filename
+    char *inputFilename = find_char_arg(argc, argv, (char*)"-input", (char*)"test.data/input/blackscholes_4000K.data");
+    // * Save output
+    bool saveOutput = find_int_arg(argc, argv, (char*)"-saveOutput", 0);
+    // * Measure time
+    bool measureTime = find_int_arg(argc, argv, (char*)"-measureTime", 0);
 
-    char *inputFilename = argv[1];
-    char *outputFilename = argv[2];
+    cout << "> Input file: " << inputFilename <<  endl << endl;
 
     // ======================================
     // == Declaring variables
@@ -56,7 +61,10 @@ int main(int argc, char **argv) {
     // >> Reduced-precision
     float *d_CallResult_rp, *d_PutResult_rp;
 
+    Time t0, t1;
     int i;
+
+    if (measureTime) getTimeNow(&t0);
 
     // ======================================
     // == Allocating memory
@@ -131,14 +139,107 @@ int main(int argc, char **argv) {
     cudaMemcpy(h_PutResultGPU_rp,  d_PutResult_rp,  optionsSize_rp, cudaMemcpyDeviceToHost);
 
     // ======================================
-    // == Comparing: FP64 vs FP32
+    // == Saving (gold) output
     // ======================================
-    float maxRelErr = -999;
-    for (i = 0 ; i < numberOptions; i++) {
-        float relErr = abs(1 - h_CallResultGPU_rp[i] / float(h_CallResultGPU[i]));
-        if (relErr > maxRelErr) maxRelErr = relErr;
+    if (saveOutput) {
+        if (save_output(h_CallResultGPU, h_PutResultGPU, numberOptions)) {
+            cout << "OUTPUT SAVED SUCCESSFULY" << endl;
+        } else {
+            cerr << "ERROR: could not save output" << endl;
+        }
     }
-    cout << "Max relative error: " << maxRelErr << endl;
+
+#ifdef FIND_THRESHOLD
+    // ======================================
+    // == Finding DMR-RP thresholds
+    // ======================================
+    cout << "FINDING THRESHOLDS:" << endl;
+
+    int zerosCount_call = 0;
+    float maxRelErr_call = -999, maxAbsErr_call = -999;
+    uint32_t maxUintErr_call = -999;
+
+    // > Call result
+    for (i = 0 ; i < numberOptions; i++) {
+        float lhs = h_CallResultGPU_rp[i];
+        float rhs = float(h_CallResultGPU[i]);
+        uint32_t lhs_data = *((uint32_t*) &lhs);
+        uint32_t rhs_data = *((uint32_t*) &rhs);
+        
+        float relErr = abs(1 - lhs / rhs);
+        float absErr = SUB_ABS(lhs, rhs);
+        uint32_t uintErr = SUB_ABS(lhs_data, rhs_data);
+
+        if (relErr > maxRelErr_call) maxRelErr_call = relErr;
+        if (absErr > maxAbsErr_call) maxAbsErr_call = absErr;
+        if (uintErr > maxUintErr_call) maxUintErr_call = uintErr;
+        if (lhs == 0 || rhs == 0) zerosCount_call++;
+    }
+
+    cout << " > Call results:" << endl;
+    cout << "   * Number of zeros: " << zerosCount_call << endl;
+    cout << "   * Max relative error: " << maxRelErr_call << endl;
+    cout << "   * Max absolute error: " << maxAbsErr_call << endl;
+    cout << "   * Max UINT error: " << maxUintErr_call << " (Bit: " << log2(maxUintErr_call) << ")" << endl;
+
+    int zerosCount_put = 0;
+    float maxRelErr_put = -999, maxAbsErr_put = -999;
+    uint32_t maxUintErr_put = -999;
+
+    // > Put result
+    for (i = 0 ; i < numberOptions; i++) {
+        float lhs = h_PutResultGPU_rp[i];
+        float rhs = float(h_PutResultGPU[i]);
+        uint32_t lhs_data = *((uint32_t*) &lhs);
+        uint32_t rhs_data = *((uint32_t*) &rhs);
+        
+        float relErr = abs(1 - lhs / rhs);
+        float absErr = SUB_ABS(lhs, rhs);
+        uint32_t uintErr = SUB_ABS(lhs_data, rhs_data);
+
+        if (relErr > maxRelErr_put) maxRelErr_put = relErr;
+        if (absErr > maxAbsErr_put) maxAbsErr_put = absErr;
+        if (uintErr > maxUintErr_put) maxUintErr_put = uintErr;
+        if (lhs == 0 || rhs == 0) zerosCount_put++;
+    }
+
+    cout << " > Put results:" << endl;
+    cout << "   * Number of zeros: " << zerosCount_put << endl;
+    cout << "   * Max relative error: " << maxRelErr_put << endl;
+    cout << "   * Max absolute error: " << maxAbsErr_put << endl;
+    cout << "   * Max UINT error: " << maxUintErr_put << " (Bit: " << log2(maxUintErr_put) << ")" << endl;
+    
+#else
+    string errMetric = ERROR_METRIC == HYBRID ? "Hybrid (Rel + Abs)" : (ERROR_METRIC == UINT_ERROR ? "UINT Error" : "Relative Error");
+    cout << "> Error metric: " << errMetric << endl;
+
+    // ======================================
+    // == Checking for faults
+    // ======================================
+
+    checkErrorsGPU(d_CallResult, d_CallResult_rp, numberOptions, CALL_RESULT_REL_ERR_THRESHOLD);
+    checkErrorsGPU(d_PutResult, d_PutResult_rp, numberOptions, PUT_RESULT_REL_ERR_THRESHOLD);
+
+    unsigned long long dmrErrors = getDMRErrors();
+    bool faultDetected = dmrErrors > 0;
+    cout << "> Faults detected?  " << (faultDetected ? "YES" : "NO") << " (DMR errors: " << dmrErrors << ")" << endl;
+    
+    // ======================================
+    // == Comparing output with Golden output
+    // ======================================
+    bool outputIsCorrect = compare_output_with_golden(h_CallResultGPU, h_PutResultGPU, numberOptions);
+    cout << "> Output corrupted? " << (!outputIsCorrect ? "YES" : "NO") << endl;
+
+    // ======================================
+    // == Classifing
+    // ======================================
+    cout << "> DMR classification: ";
+    if (faultDetected && outputIsCorrect) cout << "FALSE POSITIVE" << endl;
+    if (faultDetected && !outputIsCorrect) cout << "TRUE POSITIVE" << endl;
+    if (!faultDetected && outputIsCorrect) cout << "TRUE NEGATIVE" << endl;
+    if (!faultDetected && !outputIsCorrect) cout << "FALSE NEGATIVE" << endl;
+
+#endif
 
     // ======================================
     // == Deallocating memory
@@ -166,5 +267,16 @@ int main(int argc, char **argv) {
     free(h_PutResultGPU_rp);
 
     cudaDeviceReset();
+
+    if (faultDetected) {
+        exit(2);
+    }
+
+    if (measureTime) {
+        getTimeNow(&t1);
+        cout << endl;
+        cout << "> Total execution time: " << elapsedTime(t0, t1) << " ms" << endl;
+    }
+
     exit(EXIT_SUCCESS);
 }

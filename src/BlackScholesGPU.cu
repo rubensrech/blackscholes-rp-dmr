@@ -47,17 +47,8 @@ __device__ inline float cndGPU(float d) {
 ///////////////////////////////////////////////////////////////////////////////
 // Black-Scholes formula for both call and put
 ///////////////////////////////////////////////////////////////////////////////
-__device__ inline void BlackScholesBodyGPU(
-    double &CallResult,
-    double &PutResult,
-    float &CallResult_rp,
-    float &PutResult_rp,
-    double S, //Stock price
-    double X, //Option strike
-    double T, //Option years
-    double R, //Riskless rate
-    double V  //Volatility rate
-) {
+__device__ inline void BlackScholesBodyGPU(double &CallResult, double &PutResult, float &CallResult_rp,
+        float &PutResult_rp, double S, double X, double T, double R, double V) {
     // > Full-precision
     double sqrtT, expRT;
     double d1, d2, CNDD1, CNDD2;
@@ -99,55 +90,20 @@ __device__ inline void BlackScholesBodyGPU(
 ////////////////////////////////////////////////////////////////////////////////
 //Process an array of optN options on GPU
 ////////////////////////////////////////////////////////////////////////////////
-__global__ void BlackScholesKernel(
-    double *d_CallResult,
-    double *d_PutResult,
-    float *d_CallResult_rp,
-    float *d_PutResult_rp,
-    double *d_StockPrice,
-    double *d_OptionStrike,
-    double *d_OptionYears,
-    double Riskfree,
-    double Volatility,
-    int optN
-) {
+__global__ void BlackScholesKernel(double *CallResult, double *PutResult, float *CallResult_rp, float *PutResult_rp,
+        double *StockPrice, double *OptionStrike, double *OptionYears, double Riskfree, double Volatility, int optN) {
+
     const int opt = blockDim.x * blockIdx.x + threadIdx.x;
-    if (opt < optN)
-        BlackScholesBodyGPU(
-            d_CallResult[opt],
-            d_PutResult[opt],
-            d_CallResult_rp[opt],
-            d_PutResult_rp[opt],
-            d_StockPrice[opt],
-            d_OptionStrike[opt],
-            d_OptionYears[opt],
-            Riskfree,
-            Volatility
-        );
+    if (opt < optN) {
+        BlackScholesBodyGPU(CallResult[opt], PutResult[opt], CallResult_rp[opt], PutResult_rp[opt],
+                StockPrice[opt], OptionStrike[opt], OptionYears[opt], Riskfree, Volatility);
+    }
 }
 
-void BlackScholesGPU(
-    double *d_CallResult,
-    double *d_PutResult,
-    float *d_CallResult_rp,
-    float *d_PutResult_rp,
-    double *d_StockPrice,
-    double *d_OptionStrike,
-    double *d_OptionYears,
-    int optN
-) {
-    BlackScholesKernel<<<DIV_UP(optN, BLOCK_SIZE), BLOCK_SIZE>>>(
-        d_CallResult,
-        d_PutResult,
-        d_CallResult_rp,
-        d_PutResult_rp,
-        d_StockPrice,
-        d_OptionStrike,
-        d_OptionYears,
-        RISKFREE,
-        VOLATILITY,
-        optN
-    ); 
+void BlackScholesGPU(double *CallResult, double *PutResult, float *CallResult_rp, float *PutResult_rp,
+        double *StockPrice, double *OptionStrike, double *OptionYears, int optN) {
+    BlackScholesKernel<<<DIV_UP(optN, BLOCK_SIZE), BLOCK_SIZE>>>(CallResult, PutResult, CallResult_rp,
+            PutResult_rp, StockPrice, OptionStrike, OptionYears, RISKFREE, VOLATILITY, optN);
 }
 
 

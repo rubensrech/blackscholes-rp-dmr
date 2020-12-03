@@ -29,6 +29,11 @@
 #
 ################################################################################
 
+# DMR-RP options
+# ERROR_METRIC = uint_error | relative_error | hybrid
+ERROR_METRIC=relative_error
+FIND_THRESHOLD=0
+
 # Compilers options
 CPP			:= g++
 CPPFLAGS	:=
@@ -41,6 +46,29 @@ NVCC_ARCH	:= -gencode arch=compute_60,code=sm_60 \
 				-gencode arch=compute_70,code=[sm_70,compute_70]
 NVCCFLAGS	:= -std=c++11 -O3 -Xptxas -v
 
+
+# Compilation flags
+ifeq ($(ERROR_METRIC), relative_error) 
+CPPFLAGS+= -DERROR_METRIC=0
+NVCCFLAGS+= -DERROR_METRIC=0
+endif
+
+ifeq ($(ERROR_METRIC), uint_error) 
+CPPFLAGS+= -DERROR_METRIC=1
+NVCCFLAGS+= -DERROR_METRIC=1
+endif
+
+ifeq ($(ERROR_METRIC), hybrid) 
+CPPFLAGS+= -DERROR_METRIC=2
+NVCCFLAGS+= -DERROR_METRIC=2
+endif
+
+ifeq ($(FIND_THRESHOLD), 1) 
+CPPFLAGS+= -DFIND_THRESHOLD
+NVCCFLAGS+= -DFIND_THRESHOLD
+endif
+
+# Paths and files
 INCLUDE		:= -I$(CUDA_PATH)/include
 LDFLAGS		:= -L$(CUDA_PATH)/lib64  -lcudart  -lcurand
 
@@ -74,7 +102,7 @@ $(OBJ_DIR)/%.cu.o: $(SRC_DIR)/%.cu $(CUH_FILES)
 
 # Executable
 $(TARGET): $(OBJ_FILES)
-	$(CPP) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
+	$(CPP) $(CPPFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDE)
 
 clean:
 	rm -rf $(TARGET)
@@ -83,7 +111,16 @@ clean:
 clobber: clean
 
 copy_titanV:
-	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/blackscholes
+	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV211:blackscholes
+
+copy_nvbitfi_titanV:
+	rsync -av -e ssh --exclude='.git' ./ gpu_carol_titanV:rubens/nvbitfi/test-apps/blackscholes
 
 copy_p100:
 	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes
+
+test:
+	./blackscholes -measureTime 1
+
+golden:
+	./blackscholes > golden_stdout.txt 2> golden_stderr.txt
