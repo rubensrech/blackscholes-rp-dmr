@@ -69,3 +69,6 @@ copy_titanV:
 
 copy_p100:
 	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes
+
+test:
+	./$(TARGET) ./test.data/input/blackscholes_4000K.data ./test.data/output/blackscholes_4000K_blackscholes_nn.data

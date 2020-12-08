@@ -1,6 +1,16 @@
 #include <fstream>
 using namespace std;
 
+#define BLACK       "\e[0;30m"
+#define RED         "\e[0;31m"
+#define GREEN       "\e[0;32m"
+#define YELLOW      "\e[0;33m"
+#define BLUE        "\e[0;34m"
+#define PURPLE      "\e[0;35m"
+#define CYAN        "\e[0;36m"
+#define WHITE       "\e[0;37m"
+#define DFT_COLOR   "\e[0m"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Process an array of optN options on CPU
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +144,8 @@ int main(int argc, char **argv) {
     // > Device data
     double *d_CallResult, *d_PutResult; // Results calculated by GPU
     double *d_StockPrice, *d_OptionStrike, *d_OptionYears; // GPU instance of input data
-    
+    cudaEvent_t start, stop;
+
     int i;
 
     // ======================================
@@ -173,19 +184,25 @@ int main(int argc, char **argv) {
     // ======================================
     // == Copying data to device
     // ======================================
+    float memCpyToDeviceTimeMs;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
+
     cudaMemcpy(d_StockPrice,    h_StockPrice,   numberOptions * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionStrike,  h_OptionStrike, numberOptions * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionYears,   h_OptionYears,  numberOptions * sizeof(double), cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
 
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&memCpyToDeviceTimeMs, start, stop);
+    printf("%s* MemCpy to device: %f ms\n%s", GREEN, memCpyToDeviceTimeMs, DFT_COLOR);
+
     // ======================================
     // == Executing on device
     // ======================================
-
-    cudaEvent_t start, stop;
-    float kernelElapsedTimeMs;
-
-    cudaEventCreate(&start);
+    float kernelTimeMs;
     cudaEventRecord(start, 0);
 
     BlackScholesGPU<<<DIV_UP(numberOptions, 128), 128>>>(
@@ -199,20 +216,31 @@ int main(int argc, char **argv) {
         numberOptions
     ); 
 
-    cudaEventCreate(&stop);
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
-
-    cudaEventElapsedTime(&kernelElapsedTimeMs, start, stop);
-    printf("Kernel time: %f ms\n", kernelElapsedTimeMs);
+    cudaEventElapsedTime(&kernelTimeMs, start, stop);
+    printf("%s* Kernel: %f ms\n%s", GREEN, kernelTimeMs, DFT_COLOR);
 
     cudaDeviceSynchronize();
 
     // ======================================
     // == Reading back results from device
     // ======================================
+    float memCpyToHostTimeMs;
+    cudaEventRecord(start, 0);
+
     cudaMemcpy(h_CallResultGPU, d_CallResult, numberOptions * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_PutResultGPU,  d_PutResult,  numberOptions * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&memCpyToHostTimeMs, start, stop);
+    printf("%s* MemCpy to host: %f ms\n%s", GREEN, memCpyToHostTimeMs, DFT_COLOR);
+
+    float noDmrTotalTimeMs = memCpyToDeviceTimeMs + kernelTimeMs + memCpyToHostTimeMs;
+    printf("%s* Total NO-DMR time: %f ms%s\n", GREEN, noDmrTotalTimeMs, DFT_COLOR);
+
 
     // ======================================
     // == Writing results to output file
