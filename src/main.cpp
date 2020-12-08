@@ -52,6 +52,8 @@ int main(int argc, char **argv) {
     double *d_StockPrice, *d_OptionStrike, *d_OptionYears; // GPU instance of input data
     // >> Reduced-precision
     float *d_CallResult_rp, *d_PutResult_rp;
+    // >> Extra
+    cudaEvent_t start, stop;
 
     Time t0, t1;
     int i;
@@ -112,19 +114,31 @@ int main(int argc, char **argv) {
     // ======================================
     // == Copying data to device
     // ======================================
+    float memCpyToDeviceTimeMs;
+    if (measureTime) {
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+        cudaEventRecord(start, 0);
+    }
+
     cudaMemcpy(d_StockPrice,    h_StockPrice,   optionsSize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionStrike,  h_OptionStrike, optionsSize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_OptionYears,   h_OptionYears,  optionsSize, cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
 
+    if (measureTime) {
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&memCpyToDeviceTimeMs, start, stop);
+        printf("%s* MemCpy to device: %f ms\n%s", GREEN, memCpyToDeviceTimeMs, DFT_COLOR);
+    }
+
     // ======================================
     // == Executing on device
     // ======================================
 
-    cudaEvent_t start, stop;
     float kernelTimeMs;
     if (measureTime) {
-        cudaEventCreate(&start);
         cudaEventRecord(start, 0);
     }
 
@@ -132,24 +146,34 @@ int main(int argc, char **argv) {
                     d_StockPrice, d_OptionStrike, d_OptionYears, numberOptions);
 
     if (measureTime) {
-        cudaEventCreate(&stop);
         cudaEventRecord(stop, 0);
         cudaEventSynchronize(stop);
         cudaEventElapsedTime(&kernelTimeMs, start, stop);
-        printf("Kernel time: %f ms\n", kernelTimeMs);
+        printf("%s* Kernel + check faults: %f ms\n%s", GREEN, kernelTimeMs, DFT_COLOR);
     }
-
-    cudaDeviceSynchronize();
 
     // ======================================
     // == Reading back results from device
     // ======================================
+    float memCpyToHostTimeMs;
+    if (measureTime) {
+        cudaEventRecord(start, 0);
+    }
+
     // > Full-precision
     cudaMemcpy(h_CallResultGPU, d_CallResult, optionsSize, cudaMemcpyDeviceToHost);
     cudaMemcpy(h_PutResultGPU,  d_PutResult,  optionsSize, cudaMemcpyDeviceToHost);
-    // > Reduced-precision
-    cudaMemcpy(h_CallResultGPU_rp, d_CallResult_rp, optionsSize_rp, cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_PutResultGPU_rp,  d_PutResult_rp,  optionsSize_rp, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+
+    if (measureTime) {
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&memCpyToHostTimeMs, start, stop);
+        printf("%s* MemCpy to host: %f ms\n%s", GREEN, memCpyToHostTimeMs, DFT_COLOR);
+
+        float dmrTotalTimeMs = memCpyToDeviceTimeMs + kernelTimeMs + memCpyToHostTimeMs;
+        printf("%s* Total DMR time: %f ms%s\n", GREEN, dmrTotalTimeMs, DFT_COLOR);
+    }
 
     // ======================================
     // == Saving (gold) output
@@ -167,6 +191,12 @@ int main(int argc, char **argv) {
     // == Finding DMR-RP thresholds
     // ======================================
     cout << "FINDING THRESHOLDS:" << endl;
+
+    // Reading back results from device
+    // > Reduced-precision
+    cudaMemcpy(h_CallResultGPU_rp, d_CallResult_rp, optionsSize_rp, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_PutResultGPU_rp,  d_PutResult_rp,  optionsSize_rp, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
 
     int zerosCount_call = 0;
     float maxRelErr_call = -999, maxAbsErr_call = -999;
