@@ -124,3 +124,4 @@ test:
 
 golden:
 	./blackscholes > golden_stdout.txt 2> golden_stderr.txt
+	mv out-vs-gold-stats.txt golden_out-vs-gold-stats.txt

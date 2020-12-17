@@ -94,13 +94,68 @@ bool compare_output_with_golden(double *CallResult, double *PutResult, int N, ch
     f.read((char*)gold_PutResult, sizeof(double) * N);
 
     bool outputsMatch = true;
-    while (outputsMatch && i < N) {
-        if (CallResult[i] != gold_CallResult[i])
+    int countDiffs = 0;
+    double absErr, relErr;
+    double minAbsErr = __DBL_MAX__, maxAbsErr = __DBL_MIN__, sumAbsErr = 0, avgAbsErr = 0;
+    double minRelErr = __DBL_MAX__, maxRelErr = __DBL_MIN__, sumRelErr = 0, avgRelErr = 0;
+    for (i = 0; i < N; i++) {
+        if (CallResult[i] != gold_CallResult[i]) {
             outputsMatch = false;
-        if (PutResult[i] != gold_PutResult[i])
+            countDiffs++;
+            // Abs diff
+            absErr = SUB_ABS(CallResult[i], gold_CallResult[i]);
+            if (absErr > maxAbsErr) maxAbsErr = absErr;
+            if (absErr < minAbsErr) minAbsErr = absErr;
+            sumAbsErr += absErr;
+            // Rel err
+            relErr = abs(1 - CallResult[i]/gold_CallResult[i]);
+            if (relErr > maxRelErr) maxRelErr = relErr;
+            if (relErr < minRelErr) minRelErr = relErr;
+            sumRelErr += relErr;
+        }
+        if (PutResult[i] != gold_PutResult[i]) {
             outputsMatch = false;
-        i++;
+            countDiffs++;
+            // Abs diff
+            absErr = SUB_ABS(PutResult[i], gold_PutResult[i]);
+            if (absErr > maxAbsErr) maxAbsErr = absErr;
+            if (absErr < minAbsErr) minAbsErr = absErr;
+            sumAbsErr += absErr;
+            // Rel err
+            relErr = abs(1 - PutResult[i]/gold_PutResult[i]);
+            if (relErr > maxRelErr) maxRelErr = relErr;
+            if (relErr < minRelErr) minRelErr = relErr;
+            sumRelErr += relErr;
+        }
     }
+
+    if (countDiffs > 0) {
+        avgAbsErr = sumAbsErr / countDiffs;
+        avgRelErr = sumRelErr / countDiffs;
+    } else {
+        avgAbsErr = sumRelErr = minAbsErr = maxAbsErr = 0;
+        avgRelErr = sumRelErr = minRelErr = maxRelErr = 0;
+    }
+    
+    // Save stats to file
+    FILE *fstats = fopen("out-vs-gold-stats.txt", "w");
+    fprintf(fstats, "===================================================\n");
+    fprintf(fstats, "========== Output VS Golden output stats ==========\n");
+    fprintf(fstats, "===================================================\n");
+    fprintf(fstats, "  > Outputs match: %s\n", outputsMatch ? "YES" : "NO");
+    fprintf(fstats, "  > Number of diff values: %u\n", countDiffs);
+    fprintf(fstats, "\n");
+    fprintf(fstats, "  > Max absolute err: %.20e\n", maxAbsErr);
+    fprintf(fstats, "  > Min absolute err: %.20e\n", minAbsErr);
+    fprintf(fstats, "  > Avg absolute err: %.20e\n", avgAbsErr);
+    fprintf(fstats, "  > Sum absolute err: %.20e\n", sumAbsErr);
+    fprintf(fstats, "\n");
+    fprintf(fstats, "  > Max relative err: %.20e\n", maxRelErr);
+    fprintf(fstats, "  > Min relative err: %.20e\n", minRelErr);
+    fprintf(fstats, "  > Avg relative err: %.20e\n", avgRelErr);
+    fprintf(fstats, "  > Sum relative err: %.20e\n", sumRelErr);
+    fprintf(fstats, "\n");
+    fclose(fstats);
 
     f.close();
     return outputsMatch;
