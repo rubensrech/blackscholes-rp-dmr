@@ -27,14 +27,10 @@ int main(int argc, char **argv) {
 
     // * Input filename
     char *inputFilename = find_char_arg(argc, argv, (char*)"-input", (char*)"test.data/input/blackscholes_4000K.data");
-    // * Gold output
-    char *goldOutputFilename = find_char_arg(argc, argv, (char*)"-goldOutput", (char*)"gold_output.data");
-    // * Save output
-    bool saveOutput = find_int_arg(argc, argv, (char*)"-saveOutput", 0);
     // * Measure time
     bool measureTime = find_int_arg(argc, argv, (char*)"-measureTime", 0);
-
-    cout << "> Input file: " << inputFilename <<  endl << endl;
+    // * Iterations
+    int iterations = find_int_arg(argc, argv, (char*)"-it", 20);
 
     // ======================================
     // == Declaring variables
@@ -111,14 +107,17 @@ int main(int argc, char **argv) {
         h_OptionYears[i] =  optionYear;      
     }
 
+
+for (i = 0; i < iterations; i++) {
     // ======================================
     // == Copying data to device
     // ======================================
+
     float memCpyToDeviceTimeMs;
     if (measureTime) {
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
-        cudaEventRecord(start, 0);
+        // cudaEventCreate(&start);
+        // cudaEventCreate(&stop);
+        // cudaEventRecord(start, 0);
     }
 
     cudaMemcpy(d_StockPrice,    h_StockPrice,   optionsSize, cudaMemcpyHostToDevice);
@@ -126,135 +125,28 @@ int main(int argc, char **argv) {
     cudaMemcpy(d_OptionYears,   h_OptionYears,  optionsSize, cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
 
-    if (measureTime) {
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&memCpyToDeviceTimeMs, start, stop);
-        printf("%s* MemCpy to device: %f ms\n%s", GREEN, memCpyToDeviceTimeMs, DFT_COLOR);
-    }
-
     // ======================================
     // == Executing on device
     // ======================================
 
-    float kernelTimeMs;
-    if (measureTime) {
-        cudaEventRecord(start, 0);
-    }
-
     BlackScholesGPU(d_CallResult, d_PutResult, d_CallResult_rp, d_PutResult_rp,
                     d_StockPrice, d_OptionStrike, d_OptionYears, numberOptions);
-
-    if (measureTime) {
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&kernelTimeMs, start, stop);
-        printf("%s* Kernel + check faults: %f ms\n%s", GREEN, kernelTimeMs, DFT_COLOR);
-    }
 
     // ======================================
     // == Reading back results from device
     // ======================================
-    float memCpyToHostTimeMs;
-    if (measureTime) {
-        cudaEventRecord(start, 0);
-    }
 
-    // > Full-precision
     cudaMemcpy(h_CallResultGPU, d_CallResult, optionsSize, cudaMemcpyDeviceToHost);
     cudaMemcpy(h_PutResultGPU,  d_PutResult,  optionsSize, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
     if (measureTime) {
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&memCpyToHostTimeMs, start, stop);
-        printf("%s* MemCpy to host: %f ms\n%s", GREEN, memCpyToHostTimeMs, DFT_COLOR);
-
-        float dmrTotalTimeMs = memCpyToDeviceTimeMs + kernelTimeMs + memCpyToHostTimeMs;
-        printf("%s* Total DMR time: %f ms%s\n", GREEN, dmrTotalTimeMs, DFT_COLOR);
+        // float totalTimeMs;
+        // cudaEventRecord(stop, 0);
+        // cudaEventSynchronize(stop);
+        // cudaEventElapsedTime(&totalTimeMs, start, stop);
+        // printf("%s* Total CUDA event time: %f ms (it: %d)%s\n", GREEN, totalTimeMs, i, DFT_COLOR);
     }
-
-    // ======================================
-    // == Saving (gold) output
-    // ======================================
-    if (saveOutput) {
-        if (save_output(h_CallResultGPU, h_PutResultGPU, numberOptions)) {
-            cout << "OUTPUT SAVED SUCCESSFULY" << endl;
-        } else {
-            cerr << "ERROR: could not save output" << endl;
-        }
-    }
-
-#ifdef FIND_THRESHOLD
-    // ======================================
-    // == Finding DMR-RP thresholds
-    // ======================================
-    cout << "FINDING THRESHOLDS:" << endl;
-
-    // Reading back results from device
-    // > Reduced-precision
-    cudaMemcpy(h_CallResultGPU_rp, d_CallResult_rp, optionsSize_rp, cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_PutResultGPU_rp,  d_PutResult_rp,  optionsSize_rp, cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize();
-
-    int zerosCount_call = 0;
-    float maxRelErr_call = -999, maxAbsErr_call = -999;
-    uint32_t maxUintErr_call = -999;
-
-    // > Call result
-    for (i = 0 ; i < numberOptions; i++) {
-        float lhs = h_CallResultGPU_rp[i];
-        float rhs = float(h_CallResultGPU[i]);
-        uint32_t lhs_data = *((uint32_t*) &lhs);
-        uint32_t rhs_data = *((uint32_t*) &rhs);
-        
-        float relErr = abs(1 - lhs / rhs);
-        float absErr = SUB_ABS(lhs, rhs);
-        uint32_t uintErr = SUB_ABS(lhs_data, rhs_data);
-
-        if (relErr > maxRelErr_call) maxRelErr_call = relErr;
-        if (absErr > maxAbsErr_call) maxAbsErr_call = absErr;
-        if (uintErr > maxUintErr_call) maxUintErr_call = uintErr;
-        if (lhs == 0 || rhs == 0) zerosCount_call++;
-    }
-
-    cout << " > Call results:" << endl;
-    cout << "   * Number of zeros: " << zerosCount_call << endl;
-    cout << "   * Max relative error: " << maxRelErr_call << endl;
-    cout << "   * Max absolute error: " << maxAbsErr_call << endl;
-    cout << "   * Max UINT error: " << maxUintErr_call << " (Bit: " << log2(maxUintErr_call) << ")" << endl;
-
-    int zerosCount_put = 0;
-    float maxRelErr_put = -999, maxAbsErr_put = -999;
-    uint32_t maxUintErr_put = -999;
-
-    // > Put result
-    for (i = 0 ; i < numberOptions; i++) {
-        float lhs = h_PutResultGPU_rp[i];
-        float rhs = float(h_PutResultGPU[i]);
-        uint32_t lhs_data = *((uint32_t*) &lhs);
-        uint32_t rhs_data = *((uint32_t*) &rhs);
-        
-        float relErr = abs(1 - lhs / rhs);
-        float absErr = SUB_ABS(lhs, rhs);
-        uint32_t uintErr = SUB_ABS(lhs_data, rhs_data);
-
-        if (relErr > maxRelErr_put) maxRelErr_put = relErr;
-        if (absErr > maxAbsErr_put) maxAbsErr_put = absErr;
-        if (uintErr > maxUintErr_put) maxUintErr_put = uintErr;
-        if (lhs == 0 || rhs == 0) zerosCount_put++;
-    }
-
-    cout << " > Put results:" << endl;
-    cout << "   * Number of zeros: " << zerosCount_put << endl;
-    cout << "   * Max relative error: " << maxRelErr_put << endl;
-    cout << "   * Max absolute error: " << maxAbsErr_put << endl;
-    cout << "   * Max UINT error: " << maxUintErr_put << " (Bit: " << log2(maxUintErr_put) << ")" << endl;
-    
-#else
-    string errMetric = ERROR_METRIC == HYBRID ? "Hybrid (Rel + Abs)" : (ERROR_METRIC == UINT_ERROR ? "UINT Error" : "Relative Error");
-    cout << "> Error metric: " << errMetric << endl;
 
     // ======================================
     // == Checking for faults
@@ -262,24 +154,8 @@ int main(int argc, char **argv) {
 
     unsigned long long dmrErrors = getDMRErrors();
     bool faultDetected = dmrErrors > 0;
-    cout << "> Faults detected?  " << (faultDetected ? "YES" : "NO") << " (DMR errors: " << dmrErrors << ")" << endl;
-    
-    // ======================================
-    // == Comparing output with Golden output
-    // ======================================
-    bool outputIsCorrect = compare_output_with_golden(h_CallResultGPU, h_PutResultGPU, numberOptions, goldOutputFilename);
-    cout << "> Output corrupted? " << (!outputIsCorrect ? "YES" : "NO") << endl;
-
-    // ======================================
-    // == Classifing
-    // ======================================
-    cout << "> DMR classification: ";
-    if (faultDetected && outputIsCorrect) cout << "FALSE POSITIVE" << endl;
-    if (faultDetected && !outputIsCorrect) cout << "TRUE POSITIVE" << endl;
-    if (!faultDetected && outputIsCorrect) cout << "TRUE NEGATIVE" << endl;
-    if (!faultDetected && !outputIsCorrect) cout << "FALSE NEGATIVE" << endl;
-
-#endif
+    // cout << "> Faults detected?  " << (faultDetected ? "YES" : "NO") << " (DMR errors: " << dmrErrors << ")" << endl;
+}
 
     // ======================================
     // == Deallocating memory
@@ -308,14 +184,9 @@ int main(int argc, char **argv) {
 
     cudaDeviceReset();
 
-    if (faultDetected) {
-        exit(2);
-    }
-
     if (measureTime) {
         getTimeNow(&t1);
-        cout << endl;
-        cout << "> Total execution time: " << elapsedTime(t0, t1) << " ms" << endl;
+        cout << GREEN << "* Total execution time: " << elapsedTime(t0, t1) << " ms (" << iterations << " iterations)" << DFT_COLOR << endl;
     }
 
     exit(EXIT_SUCCESS);

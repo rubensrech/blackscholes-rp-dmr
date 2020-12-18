@@ -119,8 +119,11 @@ copy_nvbitfi_titanV:
 copy_p100:
 	rsync -av -e ssh --exclude='.git' ./ gppd:blackscholes
 
+copy_xavier:
+	rsync -av -e ssh --exclude='.git' ./ nvidia@192.168.193.16:rubens/blackscholes
+
 test:
-	./blackscholes -measureTime 1
+	./blackscholes -measureTime 1 -it 20
 
 golden:
 	./blackscholes > golden_stdout.txt 2> golden_stderr.txt

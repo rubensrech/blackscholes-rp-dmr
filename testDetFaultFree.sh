@@ -1,3 +1,0 @@
-while ./blackscholes; [ $? -ne 2 ];do
-    echo ...
-done
