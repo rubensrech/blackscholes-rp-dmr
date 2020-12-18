@@ -122,6 +122,9 @@ copy_p100:
 copy_xavier:
 	rsync -av -e ssh --exclude='.git' ./ nvidia@192.168.193.16:rubens/blackscholes
 
+bring_results:
+	rsync -av -e ssh nvidia@192.168.193.16:rubens/blackscholes/results ./results/
+
 test:
 	./blackscholes -measureTime 1 -it 20
 

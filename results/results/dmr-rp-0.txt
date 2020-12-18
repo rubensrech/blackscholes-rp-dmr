@@ -1,0 +1,60 @@
+Total execution time: 827.368 ms (50 iterations)
+> ITERATION 1 => Total energy: 325.5 mJ
+
+Total execution time: 576.024 ms (50 iterations)
+> ITERATION 2 => Total energy: 248.0 mJ
+
+Total execution time: 651.823 ms (50 iterations)
+> ITERATION 3 => Total energy: 372.0 mJ
+
+Total execution time: 458.177 ms (50 iterations)
+> ITERATION 4 => Total energy: 201.5 mJ
+
+Total execution time: 473.622 ms (50 iterations)
+> ITERATION 5 => Total energy: 217.0 mJ
+
+Total execution time: 710.609 ms (50 iterations)
+> ITERATION 6 => Total energy: 372.0 mJ
+
+Total execution time: 584.426 ms (50 iterations)
+> ITERATION 7 => Total energy: 248.0 mJ
+
+Total execution time: 614.321 ms (50 iterations)
+> ITERATION 8 => Total energy: 356.5 mJ
+
+Total execution time: 558.952 ms (50 iterations)
+> ITERATION 9 => Total energy: 263.5 mJ
+
+Total execution time: 480.637 ms (50 iterations)
+> ITERATION 10 => Total energy: 263.5 mJ
+
+Total execution time: 441.616 ms (50 iterations)
+> ITERATION 11 => Total energy: 201.5 mJ
+
+Total execution time: 480.805 ms (50 iterations)
+> ITERATION 12 => Total energy: 294.5 mJ
+
+Total execution time: 479.681 ms (50 iterations)
+> ITERATION 13 => Total energy: 263.5 mJ
+
+Total execution time: 460.194 ms (50 iterations)
+> ITERATION 14 => Total energy: 279.0 mJ
+
+Total execution time: 513.39 ms (50 iterations)
+> ITERATION 15 => Total energy: 263.5 mJ
+
+Total execution time: 574.756 ms (50 iterations)
+> ITERATION 16 => Total energy: 248.0 mJ
+
+Total execution time: 482.015 ms (50 iterations)
+> ITERATION 17 => Total energy: 279.0 mJ
+
+Total execution time: 575.045 ms (50 iterations)
+> ITERATION 18 => Total energy: 263.5 mJ
+
+Total execution time: 458.006 ms (50 iterations)
+> ITERATION 19 => Total energy: 201.5 mJ
+
+Total execution time: 592.395 ms (50 iterations)
+> ITERATION 20 => Total energy: 279.0 mJ
+

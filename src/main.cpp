@@ -36,18 +36,12 @@ int main(int argc, char **argv) {
     // == Declaring variables
     // ======================================
     // > Host data
-    // >> Full-precision
     double *h_CallResultGPU, *h_PutResultGPU; // CPU copy of GPU results
     double *h_StockPrice, *h_OptionStrike, *h_OptionYears; // CPU instance of input data
-    // >> Reduced-precision
-    float *h_CallResultGPU_rp, *h_PutResultGPU_rp;
     
     // > Device data
-    // >> Full-precision
     double *d_CallResult, *d_PutResult; // Results calculated by GPU
     double *d_StockPrice, *d_OptionStrike, *d_OptionYears; // GPU instance of input data
-    // >> Reduced-precision
-    float *d_CallResult_rp, *d_PutResult_rp;
     // >> Extra
     cudaEvent_t start, stop;
 
@@ -74,26 +68,18 @@ int main(int argc, char **argv) {
     const int optionsSize_rp = numberOptions * sizeof(double);
 
     // > Host data
-    // >> Full-precision
     h_CallResultGPU = (double *)malloc(optionsSize);
     h_PutResultGPU  = (double *)malloc(optionsSize);
     h_StockPrice    = (double *)malloc(optionsSize);
     h_OptionStrike  = (double *)malloc(optionsSize);
     h_OptionYears   = (double *)malloc(optionsSize);
-    // >> Reduced-precision
-    h_CallResultGPU_rp = (float *)malloc(optionsSize_rp);
-    h_PutResultGPU_rp  = (float *)malloc(optionsSize_rp);
 
     // > Device data
-    // >> Full-precision
     cudaMalloc((void **)&d_CallResult,   optionsSize);
     cudaMalloc((void **)&d_PutResult,    optionsSize);
     cudaMalloc((void **)&d_StockPrice,   optionsSize);
     cudaMalloc((void **)&d_OptionStrike, optionsSize);
     cudaMalloc((void **)&d_OptionYears,  optionsSize);
-    // >> Reduced-precision
-    cudaMalloc((void **)&d_CallResult_rp,   optionsSize_rp);
-    cudaMalloc((void **)&d_PutResult_rp,    optionsSize_rp);
 
 
     // ======================================
@@ -129,7 +115,7 @@ for (i = 0; i < iterations; i++) {
     // == Executing on device
     // ======================================
 
-    BlackScholesGPU(d_CallResult, d_PutResult, d_CallResult_rp, d_PutResult_rp,
+    BlackScholesGPU(d_CallResult, d_PutResult,
                     d_StockPrice, d_OptionStrike, d_OptionYears, numberOptions);
 
     // ======================================
@@ -147,14 +133,6 @@ for (i = 0; i < iterations; i++) {
         // cudaEventElapsedTime(&totalTimeMs, start, stop);
         // printf("%s* Total CUDA event time: %f ms (it: %d)%s\n", GREEN, totalTimeMs, i, DFT_COLOR);
     }
-
-    // ======================================
-    // == Checking for faults
-    // ======================================
-
-    unsigned long long dmrErrors = getDMRErrors();
-    bool faultDetected = dmrErrors > 0;
-    // cout << "> Faults detected?  " << (faultDetected ? "YES" : "NO") << " (DMR errors: " << dmrErrors << ")" << endl;
 }
 
     // ======================================
@@ -167,9 +145,6 @@ for (i = 0; i < iterations; i++) {
     cudaFree(d_StockPrice);
     cudaFree(d_PutResult);
     cudaFree(d_CallResult);
-    // >> Reduced-precision
-    cudaFree(d_CallResult_rp);
-    cudaFree(d_PutResult_rp);
 
     // > Host data
     // >> Full-precision
@@ -178,9 +153,6 @@ for (i = 0; i < iterations; i++) {
     free(h_StockPrice);
     free(h_PutResultGPU);
     free(h_CallResultGPU);
-    // >> Reduced-precision
-    free(h_CallResultGPU_rp);
-    free(h_PutResultGPU_rp);
 
     cudaDeviceReset();
 
