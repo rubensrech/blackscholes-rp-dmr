@@ -1,0 +1,178 @@
+> DMR: NO-DMR
+* MemCpy to device: 0.704480 ms
+* Kernel: 788.739014 ms (1000 iterations)
+* MemCpy to host: 3.484160 ms
+* Total DMR time: 792.927612 ms
+> Total execution time: 967.861 ms
+> ITERATION 1 => Total energy: 3016.0 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.928992 ms
+* Kernel: 788.816956 ms (1000 iterations)
+* MemCpy to host: 3.207808 ms
+* Total DMR time: 792.953796 ms
+> Total execution time: 963.231 ms
+> ITERATION 2 => Total energy: 3509.3 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.723072 ms
+* Kernel: 789.050537 ms (1000 iterations)
+* MemCpy to host: 3.207040 ms
+* Total DMR time: 792.980652 ms
+> Total execution time: 970.442 ms
+> ITERATION 3 => Total energy: 4527.8 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.996448 ms
+* Kernel: 768.753113 ms (1000 iterations)
+* MemCpy to host: 3.526336 ms
+* Total DMR time: 773.275879 ms
+> Total execution time: 943.805 ms
+> ITERATION 4 => Total energy: 3555.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.636832 ms
+* Kernel: 768.674561 ms (1000 iterations)
+* MemCpy to host: 3.520672 ms
+* Total DMR time: 772.832092 ms
+> Total execution time: 940.067 ms
+> ITERATION 5 => Total energy: 3864.0 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.666240 ms
+* Kernel: 768.585205 ms (1000 iterations)
+* MemCpy to host: 2.937312 ms
+* Total DMR time: 772.188782 ms
+> Total execution time: 933.692 ms
+> ITERATION 6 => Total energy: 3894.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.553088 ms
+* Kernel: 768.576538 ms (1000 iterations)
+* MemCpy to host: 2.702272 ms
+* Total DMR time: 771.831909 ms
+> Total execution time: 941.274 ms
+> ITERATION 7 => Total energy: 3848.5 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.629216 ms
+* Kernel: 774.716675 ms (1000 iterations)
+* MemCpy to host: 3.363200 ms
+* Total DMR time: 778.709106 ms
+> Total execution time: 941.252 ms
+> ITERATION 8 => Total energy: 3894.2 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.842272 ms
+* Kernel: 779.968750 ms (1000 iterations)
+* MemCpy to host: 3.062528 ms
+* Total DMR time: 783.873535 ms
+> Total execution time: 962.017 ms
+> ITERATION 9 => Total energy: 3847.6 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.690624 ms
+* Kernel: 783.355347 ms (1000 iterations)
+* MemCpy to host: 3.153984 ms
+* Total DMR time: 787.199951 ms
+> Total execution time: 967.981 ms
+> ITERATION 10 => Total energy: 4557.9 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.951584 ms
+* Kernel: 783.400085 ms (1000 iterations)
+* MemCpy to host: 3.125440 ms
+* Total DMR time: 787.477112 ms
+> Total execution time: 962.682 ms
+> ITERATION 11 => Total energy: 3554.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.553472 ms
+* Kernel: 783.782227 ms (1000 iterations)
+* MemCpy to host: 3.184800 ms
+* Total DMR time: 787.520508 ms
+> Total execution time: 953.86 ms
+> ITERATION 12 => Total energy: 3924.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.718592 ms
+* Kernel: 783.451477 ms (1000 iterations)
+* MemCpy to host: 3.264896 ms
+* Total DMR time: 787.434937 ms
+> Total execution time: 957.906 ms
+> ITERATION 13 => Total energy: 3940.1 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.604192 ms
+* Kernel: 784.415771 ms (1000 iterations)
+* MemCpy to host: 3.347616 ms
+* Total DMR time: 788.367554 ms
+> Total execution time: 952.843 ms
+> ITERATION 14 => Total energy: 3986.5 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.908640 ms
+* Kernel: 784.020081 ms (1000 iterations)
+* MemCpy to host: 3.168800 ms
+* Total DMR time: 788.097534 ms
+> Total execution time: 959.886 ms
+> ITERATION 15 => Total energy: 3924.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.578016 ms
+* Kernel: 783.459351 ms (1000 iterations)
+* MemCpy to host: 3.987424 ms
+* Total DMR time: 788.024780 ms
+> Total execution time: 955.862 ms
+> ITERATION 16 => Total energy: 3955.6 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.484384 ms
+* Kernel: 784.556824 ms (1000 iterations)
+* MemCpy to host: 3.286496 ms
+* Total DMR time: 788.327698 ms
+> Total execution time: 952.541 ms
+> ITERATION 17 => Total energy: 3924.4 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.905728 ms
+* Kernel: 783.540222 ms (1000 iterations)
+* MemCpy to host: 3.205728 ms
+* Total DMR time: 787.651672 ms
+> Total execution time: 957.069 ms
+> ITERATION 18 => Total energy: 3924.7 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.754688 ms
+* Kernel: 783.861145 ms (1000 iterations)
+* MemCpy to host: 3.055424 ms
+* Total DMR time: 787.671265 ms
+> Total execution time: 953.441 ms
+> ITERATION 19 => Total energy: 3955.6 mJ
+
+
+> DMR: NO-DMR
+* MemCpy to device: 0.565088 ms
+* Kernel: 784.078979 ms (1000 iterations)
+* MemCpy to host: 3.120064 ms
+* Total DMR time: 787.764099 ms
+> Total execution time: 960.855 ms
+> ITERATION 20 => Total energy: 3924.7 mJ
