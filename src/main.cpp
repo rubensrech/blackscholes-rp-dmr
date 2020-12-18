@@ -93,17 +93,15 @@ int main(int argc, char **argv) {
         h_OptionYears[i] =  optionYear;      
     }
 
-
-for (i = 0; i < iterations; i++) {
     // ======================================
     // == Copying data to device
     // ======================================
 
     float memCpyToDeviceTimeMs;
     if (measureTime) {
-        // cudaEventCreate(&start);
-        // cudaEventCreate(&stop);
-        // cudaEventRecord(start, 0);
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+        cudaEventRecord(start, 0);
     }
 
     cudaMemcpy(d_StockPrice,    h_StockPrice,   optionsSize, cudaMemcpyHostToDevice);
@@ -115,8 +113,10 @@ for (i = 0; i < iterations; i++) {
     // == Executing on device
     // ======================================
 
+for (i = 0; i < iterations; i++) {
     BlackScholesGPU(d_CallResult, d_PutResult,
                     d_StockPrice, d_OptionStrike, d_OptionYears, numberOptions);
+}
 
     // ======================================
     // == Reading back results from device
@@ -127,13 +127,12 @@ for (i = 0; i < iterations; i++) {
     cudaDeviceSynchronize();
 
     if (measureTime) {
-        // float totalTimeMs;
-        // cudaEventRecord(stop, 0);
-        // cudaEventSynchronize(stop);
-        // cudaEventElapsedTime(&totalTimeMs, start, stop);
-        // printf("%s* Total CUDA event time: %f ms (it: %d)%s\n", GREEN, totalTimeMs, i, DFT_COLOR);
+        float totalTimeMs;
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&totalTimeMs, start, stop);
+        printf("%s* Total CUDA event time: %f ms%s\n", GREEN, totalTimeMs, DFT_COLOR);
     }
-}
 
     // ======================================
     // == Deallocating memory
