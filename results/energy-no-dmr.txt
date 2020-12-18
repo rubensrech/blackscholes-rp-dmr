@@ -176,3 +176,5 @@
 * Total DMR time: 787.764099 ms
 > Total execution time: 960.855 ms
 > ITERATION 20 => Total energy: 3924.7 mJ
+
+

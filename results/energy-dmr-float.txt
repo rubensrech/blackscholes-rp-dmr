@@ -196,3 +196,5 @@ Total execution time: 1017.6 ms
 > Faults detected?  NO (DMR errors: 0)
 Total execution time: 1026.4 ms
 > ITERATION 20 => Total energy: 4450.8 mJ
+
+

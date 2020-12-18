@@ -1,0 +1,72 @@
+> DMR: NO-DMR
+* MemCpy to device: 0.678816 ms
+* Kernel: 8.918240 ms (1000 iterations)
+* MemCpy to host: 1.093248 ms
+* Total DMR time: 10.690304 ms
+> Total execution time: 776.449 ms
+
+> DMR: NO-DMR
+* MemCpy to device: 0.649152 ms
+* Kernel: 8.943936 ms (1000 iterations)
+* MemCpy to host: 1.107552 ms
+* Total DMR time: 10.700640 ms
+> Total execution time: 750.862 ms
+
+> DMR: NO-DMR
+* MemCpy to device: 0.647296 ms
+* Kernel: 8.896256 ms (1000 iterations)
+* MemCpy to host: 1.105344 ms
+* Total DMR time: 10.648896 ms
+> Total execution time: 759.816 ms
+
+
+
+> DMR: Float
+* MemCpy to device: 0.665920 ms
+* Kernel + check faults: 10.602624 ms (1000 iterations)
+* MemCpy to host: 1.092544 ms
+* Total DMR time: 12.361088 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 760.379 ms
+
+> DMR: Float
+* MemCpy to device: 0.648160 ms
+* Kernel + check faults: 10.656768 ms (1000 iterations)
+* MemCpy to host: 1.119008 ms
+* Total DMR time: 12.423936 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 769.233 ms
+
+> DMR: Float
+* MemCpy to device: 0.655552 ms
+* Kernel + check faults: 10.652128 ms (1000 iterations)
+* MemCpy to host: 1.106816 ms
+* Total DMR time: 12.414496 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 762.536 ms
+
+
+
+> DMR: Double
+* MemCpy to device: 0.651264 ms
+* Kernel + check faults: 12.639744 ms (1000 iterations)
+* MemCpy to host: 1.109600 ms
+* Total DMR time: 14.400608 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 764.594 ms
+
+> DMR: Double
+* MemCpy to device: 0.648640 ms
+* Kernel + check faults: 12.619072 ms (1000 iterations)
+* MemCpy to host: 1.102752 ms
+* Total DMR time: 14.370463 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 773.368 ms
+
+> DMR: Double
+* MemCpy to device: 0.648832 ms
+* Kernel + check faults: 12.608832 ms (1000 iterations)
+* MemCpy to host: 1.096448 ms
+* Total DMR time: 14.354113 ms
+> Faults detected?  NO (DMR errors: 0)
+> Total execution time: 771.14 ms
