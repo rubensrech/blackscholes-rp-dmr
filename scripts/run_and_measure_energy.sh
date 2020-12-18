@@ -12,7 +12,7 @@ cd ../
 for ((i=1;i<=NUM_ITERATIONS;i++)); do
 
     # Execute in background
-    ./blackscholes -measureTime 1 -it 50 2>> /dev/null &
+    ./blackscholes -measureTime 1 -it 1000 2>> /dev/null &
     PID=$!
 
     # Calculate energy consumption
