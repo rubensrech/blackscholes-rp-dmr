@@ -1,0 +1,200 @@
+> DMR: Float
+* MemCpy to device: 0.800000 ms
+* Kernel + check faults: 840.862244 ms (1000 iterations)
+* MemCpy to host: 3.486912 ms
+* Total DMR time: 845.149170 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1031.65 ms
+> ITERATION 1 => Total energy: 3062.0 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.738720 ms
+* Kernel + check faults: 841.180115 ms (1000 iterations)
+* MemCpy to host: 3.776992 ms
+* Total DMR time: 845.695801 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1018.03 ms
+> ITERATION 2 => Total energy: 4450.5 mJ
+
+
+> DMR: Float
+* MemCpy to device: 1.277920 ms
+* Kernel + check faults: 841.066040 ms (1000 iterations)
+* MemCpy to host: 3.122720 ms
+* Total DMR time: 845.466675 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1011.88 ms
+> ITERATION 3 => Total energy: 4450.5 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.759488 ms
+* Kernel + check faults: 841.540955 ms (1000 iterations)
+* MemCpy to host: 3.416064 ms
+* Total DMR time: 845.716492 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1025.78 ms
+> ITERATION 4 => Total energy: 4404.4 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.646016 ms
+* Kernel + check faults: 841.334900 ms (1000 iterations)
+* MemCpy to host: 3.335360 ms
+* Total DMR time: 845.316284 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1018.88 ms
+> ITERATION 5 => Total energy: 4481.3 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.526752 ms
+* Kernel + check faults: 840.970398 ms (1000 iterations)
+* MemCpy to host: 3.644800 ms
+* Total DMR time: 845.141907 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1017.49 ms
+> ITERATION 6 => Total energy: 4466.3 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.558240 ms
+* Kernel + check faults: 841.023376 ms (1000 iterations)
+* MemCpy to host: 3.608384 ms
+* Total DMR time: 845.190002 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1017.09 ms
+> ITERATION 7 => Total energy: 4450.5 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.786560 ms
+* Kernel + check faults: 840.636292 ms (1000 iterations)
+* MemCpy to host: 3.179200 ms
+* Total DMR time: 844.602051 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1021.74 ms
+> ITERATION 8 => Total energy: 4435.1 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.622400 ms
+* Kernel + check faults: 828.373901 ms (1000 iterations)
+* MemCpy to host: 2.961376 ms
+* Total DMR time: 831.957642 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 999.617 ms
+> ITERATION 9 => Total energy: 4481.5 mJ
+
+
+> DMR: Float
+* MemCpy to device: 1.152256 ms
+* Kernel + check faults: 825.039062 ms (1000 iterations)
+* MemCpy to host: 3.187136 ms
+* Total DMR time: 829.378479 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1004.7 ms
+> ITERATION 10 => Total energy: 4374.1 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.711808 ms
+* Kernel + check faults: 824.689636 ms (1000 iterations)
+* MemCpy to host: 3.168160 ms
+* Total DMR time: 828.569580 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 995.432 ms
+> ITERATION 11 => Total energy: 4451.3 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.578752 ms
+* Kernel + check faults: 825.373962 ms (1000 iterations)
+* MemCpy to host: 3.007360 ms
+* Total DMR time: 828.960083 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 994.526 ms
+> ITERATION 12 => Total energy: 4405.4 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.782336 ms
+* Kernel + check faults: 846.658203 ms (1000 iterations)
+* MemCpy to host: 3.346368 ms
+* Total DMR time: 850.786926 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1025.32 ms
+> ITERATION 13 => Total energy: 4342.8 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.522144 ms
+* Kernel + check faults: 847.143066 ms (1000 iterations)
+* MemCpy to host: 3.218432 ms
+* Total DMR time: 850.883667 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1021.67 ms
+> ITERATION 14 => Total energy: 4481.8 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.706816 ms
+* Kernel + check faults: 847.094421 ms (1000 iterations)
+* MemCpy to host: 3.647392 ms
+* Total DMR time: 851.448608 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1028.85 ms
+> ITERATION 15 => Total energy: 4481.8 mJ
+
+
+> DMR: Float
+* MemCpy to device: 1.008576 ms
+* Kernel + check faults: 846.694153 ms (1000 iterations)
+* MemCpy to host: 3.184480 ms
+* Total DMR time: 850.887268 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1027.37 ms
+> ITERATION 16 => Total energy: 4481.8 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.558688 ms
+* Kernel + check faults: 846.691162 ms (1000 iterations)
+* MemCpy to host: 3.079744 ms
+* Total DMR time: 850.329651 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1017.51 ms
+> ITERATION 17 => Total energy: 4512.7 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.677216 ms
+* Kernel + check faults: 846.728271 ms (1000 iterations)
+* MemCpy to host: 3.203392 ms
+* Total DMR time: 850.608887 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1025.83 ms
+> ITERATION 18 => Total energy: 4435.4 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.877568 ms
+* Kernel + check faults: 846.758545 ms (1000 iterations)
+* MemCpy to host: 3.209024 ms
+* Total DMR time: 850.845154 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1017.6 ms
+> ITERATION 19 => Total energy: 4512.7 mJ
+
+
+> DMR: Float
+* MemCpy to device: 0.648096 ms
+* Kernel + check faults: 846.890869 ms (1000 iterations)
+* MemCpy to host: 3.105888 ms
+* Total DMR time: 850.644836 ms
+> Faults detected?  NO (DMR errors: 0)
+Total execution time: 1026.4 ms
+> ITERATION 20 => Total energy: 4450.8 mJ
+
+

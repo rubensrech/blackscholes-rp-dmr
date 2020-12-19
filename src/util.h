@@ -37,6 +37,10 @@ inline void checkCudaError(cudaError_t code, const char *file, int line, bool ab
 #define WHITE       "\e[0;37m"
 #define DFT_COLOR   "\e[0m"
 
+#define DMR_DOUBLE  64
+#define DMR_FLOAT   32
+#define NO_DMR      0
+
 uint32_t log2(uint32_t n);
 
 typedef struct timeval Time;

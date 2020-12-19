@@ -3,6 +3,19 @@
 
 unsigned long long getDMRErrors();
 
-void BlackScholesGPU(double *CallResult, double *PutResult, float *CallResult_rp, float *PutResult_rp,
-        double *StockPrice, double *OptionStrike, double *OptionYears, int optN);
+void BlackScholesGPU_noDMR(
+    double *CallResult, double *PutResult,
+    double *StockPrice, double *OptionStrike, double *OptionYears, int optN
+);
+
+void BlackScholesGPU_DMR_float(
+    double *CallResult, double *PutResult,
+    double *StockPrice, double *OptionStrike, double *OptionYears, int optN
+);
+
+void BlackScholesGPU_DMR_double(
+    double *CallResult, double *PutResult,
+    double *StockPrice, double *OptionStrike, double *OptionYears, int optN
+);
+
 #endif
